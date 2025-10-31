@@ -1,0 +1,4 @@
+easyocr==1.7.2
+pymupdf==1.26.5
+typing_extensions>=4.12.2
+Flask==3.0.3
