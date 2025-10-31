@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OCR Result</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <style>
+      .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .pane { background: #fff; border: 1px solid #e3e3e3; border-radius: 8px; overflow: hidden; }
+      .pane header { padding: .75rem 1rem; background: #f6f6f8; border-bottom: 1px solid #e3e3e3; font-weight: 600; }
+      .pane .content { height: calc(100vh - 170px); overflow: auto; }
+      .pdf-embed { width: 100%; height: calc(100vh - 170px); border: none; }
+      .page { padding: .75rem 1rem; border-bottom: 1px dashed #eee; }
+      .item { color: #333; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+      .toolbar { display:flex; gap:.5rem; align-items:center; padding: .5rem 1rem; }
+      .toolbar textarea { width: 100%; height: 7rem; }
+      .toolbar button { white-space: nowrap; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>OCR Result</h1>
+      <p>Original PDF and extracted text.</p>
+    </header>
+
+    <div class="toolbar">
+      <a class="button" href="/">Upload another</a>
+      <a class="button" href="/ocr/{{ uid }}.json" target="_blank">Download JSON</a>
+      <textarea readonly id="flatText" placeholder="All recognized text for quick copy">{{ flat_text }}</textarea>
+      <button onclick="copyFlat()">Copy text</button>
+    </div>
+
+    <main class="layout">
+      <section class="pane">
+        <header>PDF Preview</header>
+        <object class="pdf-embed" data="/pdf/{{ uid }}" type="application/pdf">
+          <p>Your browser cannot display PDFs. <a href="/pdf/{{ uid }}">Download the PDF</a>.</p>
+        </object>
+      </section>
+      <section class="pane">
+        <header>Recognized Text</header>
+        <div class="content">
+          {% for page in pages %}
+          <div class="page">
+            <h3>Page {{ page["page"] }}</h3>
+            {% set items = page["items"] if page["items"] is defined else [] %}
+            {% if items %}
+              {% for it in items %}
+              <div class="item">{{ it["text"] }}</div>
+              {% endfor %}
+            {% else %}
+              <div class="item" style="opacity:.7">No text detected on this page.</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+    </main>
+
+    <script>
+      function copyFlat(){
+        const el = document.getElementById('flatText');
+        el.select();
+        document.execCommand('copy');
+      }
+    </script>
+  </body>
+  </html>
